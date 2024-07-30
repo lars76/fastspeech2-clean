@@ -12,8 +12,8 @@ If you discover something that can further improve the speech quality, please co
 
 | Model        | UTMOS  | CER    | Val loss | Params |
 |--------------|--------|--------|----------|--------|
-| LightSpeech  | 2.3098 | 0.2594 | 0.6640   | 3.37M  |
-| FastSpeech2  | **2.5620** | **0.2550** | 0.6374   | 25.36M |
+| [LightSpeech](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt)  | 2.3098 | 0.2594 | 0.6640   | 3.37M  |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt)  | **2.5620** | **0.2550** | 0.6374   | 25.36M |
 | Ground truth | 2.4276 | 0.2917 | **0.0**      |   -    |
 
 MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better). The "ground truth" refers to the reconstruction of the real mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`. For predicting the generated spectrograms, we use `bigvgan_base_22khz_80band` due to its superior performance on distorted spectograms. See also my other [repository](https://github.com/lars76/bigvgan-mirror/). For validation, 14415 files are used (20% of the whole dataset).
@@ -39,7 +39,7 @@ https://github.com/user-attachments/assets/09a4659c-c455-47cc-9032-611c3f0cc23d
 
 ## Prediction
 
-After downloading a model, you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed.
+After [downloading a model](https://github.com/lars76/fastspeech2-clean/releases), you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed.
 
 ### Example Commands
 
