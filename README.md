@@ -13,18 +13,29 @@ If you discover something that can further improve the speech quality, please co
 | Model        | UTMOS  | CER    | Val loss | Params |
 |--------------|--------|--------|----------|--------|
 | LightSpeech  | 2.3098 | 0.2594 | 0.6640   | 3.37M  |
-| FastSpeech2  | 2.5620 | 0.2550 | 0.6374   | 25.36M |
-| Ground truth | 2.4276 | 0.2917 | 0.0      |   -    |
+| FastSpeech2  | **2.5620** | **0.2550** | 0.6374   | 25.36M |
+| Ground truth | 2.4276 | 0.2917 | **0.0**      |   -    |
 
 MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better). The "ground truth" refers to the reconstruction of the real mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`. For predicting the generated spectrograms, we use `bigvgan_base_22khz_80band` due to its superior performance on distorted spectograms. See also my other [repository](https://github.com/lars76/bigvgan-mirror/). For validation, 14415 files are used (20% of the whole dataset).
 
 ### Audio Samples
 
+| **Hanzi**                          | **Pinyin**                                                | **IPA**                                             |
+|------------------------------------|-----------------------------------------------------------|-----------------------------------------------------|
+| 按被征农地的原有用途来确定补偿         | an4 bei4 zheng1 nong2 di4 de5 yuan2 you3 yong4 tu2 lai2 que4 ding4 bu3 chang2 | an4 pei̯4 ʈʂəŋ1 nʊŋ2 ti4 tɤ5 ɥɛn2 jou̯3 jʊŋ4 tʰu2 lai̯2 tɕʰɥe4 tiŋ4 pu3 ʈʂʰaŋ2 |
+
+
 #### LightSpeech
+
+https://github.com/user-attachments/assets/b4e8bbd1-070b-405c-9c01-a941dffb1a74
 
 #### FastSpeech2
 
+https://github.com/user-attachments/assets/01cb62b7-f801-4584-8a65-3de647a1cc1e
+
 #### Ground truth
+
+https://github.com/user-attachments/assets/09a4659c-c455-47cc-9032-611c3f0cc23d
 
 ## Prediction
 
