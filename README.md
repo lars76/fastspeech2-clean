@@ -22,7 +22,7 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 | Model | UTMOS | CER | Val Loss | Params |
 |-------|-------|-----|----------|--------|
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/?) | **2.6578** | **0.2529** | 0.6335 | 25.36M |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2_ab_combined.pt) | **2.6578** | **0.2529** | 0.6335 | 25.36M |
 | Ground Truth | 2.5482 | 0.2909 | **0.0** | - |
 
 ### Notes
@@ -73,7 +73,7 @@ Here, `<sil>` denotes a silence marker.
 
 ### Preparing training data
 
-To prepare your training data, organize all audio files in a directory named `dataset` with the following structure: dataset/SPEAKER_NAME/FILENAME.wav and dataset/SPEAKER_NAME/FILENAME.TextGrid. For instance, the file `SSB00050001.wav` from AISHELL-3 would be located at `dataset/SSB0005/SSB00050001.wav`.
+Organize all audio files in a directory named `dataset` with the following structure: `dataset/SPEAKER_NAME/FILENAME.wav` and `dataset/SPEAKER_NAME/FILENAME.TextGrid`. For instance, the file `SSB00050001.wav` from AISHELL-3 would be located at `dataset/SSB0005/SSB00050001.wav`.
 
 For [AISHELL-3](https://www.openslr.org/93/) (Apache v2.0 license) and [biaobei](https://en.data-baker.com/datasets/freeDatasets/) (non-commercial use only), pretrained TextGrid files are available in this [repository](https://github.com/lars76/forced-alignment-chinese). However, you can also generate your own annotations if needed.
 
