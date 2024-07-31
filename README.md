@@ -2,23 +2,37 @@
 
 This repository provides a clean and modernized implementation of [FastSpeech2](https://arxiv.org/abs/2006.04558) and [LightSpeech](https://arxiv.org/abs/2102.04040). Existing repositories often have problems with reproducibility or contain bugs. This version aims to solve these problems by providing a cleaner and more up-to-date code base.
 
-Currently, pre-processing and training are only implemented for [AISHELL-3](https://www.openslr.org/93/) (Mandarin Chinese, Apache v2.0 license). However, the scripts are designed to be easily adapted to other datasets.
+Currently, pre-processing and training are only implemented for Chinese speech datasets. However, the scripts are designed to be easily adapted to other languages.
 
 ![Alt text](example.jpg?raw=true)
 
-## Available Models
+## Models
 
-If you discover something that can further improve the speech quality, please contribute by opening an issue or pull request.
+If you have suggestions to further enhance speech quality, please contribute by opening an issue or pull request.
 
-| Model        | UTMOS  | CER    | Val loss | Params |
-|--------------|--------|--------|----------|--------|
-| [LightSpeech](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt)  | 2.3098 | 0.2594 | 0.6640   | 3.37M  |
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt)  | **2.5620** | **0.2550** | 0.6374   | 25.36M |
-| Ground truth | 2.4276 | 0.2917 | **0.0**      |   -    |
+### Models trained on AISHELL-3
 
-MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better). The "ground truth" refers to the reconstruction of the real mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`. For predicting the generated spectrograms, we use `bigvgan_base_22khz_80band` due to its superior performance on distorted spectograms. See also my other [repository](https://github.com/lars76/bigvgan-mirror/). For validation, 14415 files are used (20% of the whole dataset).
+| Model | UTMOS | CER | Val Loss | Params |
+|-------|-------|-----|----------|--------|
+| [LightSpeech](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt) | 2.3098 | 0.2594 | 0.6640 | 3.37M |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt) | **2.5620** | **0.2550** | 0.6374 | 25.36M |
+| Ground Truth | 2.4276 | 0.2917 | **0.0** | - |
 
-### Audio Samples
+### Models trained on AISHELL-3 and biaobei combined
+
+| Model | UTMOS | CER | Val Loss | Params |
+|-------|-------|-----|----------|--------|
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/?) | **2.6578** | **0.2529** | 0.6335 | 25.36M |
+| Ground Truth | 2.5482 | 0.2909 | **0.0** | - |
+
+### Notes
+
+- MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better).
+- The "ground truth" refers to the reconstruction of the true mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`.
+- For predicting generated spectrograms, `bigvgan_base_22khz_80band` is used due to its superior performance on distorted spectrograms. See also my other [repository](https://github.com/lars76/bigvgan-mirror/).
+- Approximately 20% of the dataset is used for validation.
+
+## Audio Samples
 
 | **Hanzi**                          | **Pinyin**                                                | **IPA**                                             |
 |------------------------------------|-----------------------------------------------------------|-----------------------------------------------------|
@@ -57,12 +71,13 @@ Here, `<sil>` denotes a silence marker.
 
 ## Instructions for training
 
-### Download dataset
+### Preparing training data
 
-1. Download [data_aishell3.tgz](https://www.openslr.org/93/). 
-2. Extract the archive to the chosen path: `tar xzf data_aishell3.tgz -C DATASET_PATH` where `DATASET_PATH` is your output path.
-3. Download the [TextGrid files](https://github.com/lars76/forced-alignment-aishell/releases/download/textgrid_files/aishell3_textgrid_files.zip) or create the files on your own by following the instruction in this [repository](https://github.com/lars76/forced-alignment-chinese).
-4. Extract the TextGrid files by running `unzip -q aishell3_textgrid_files.zip` and copy the files using `cp -r test train DATASET_PATH`.
+To prepare your training data, organize all audio files in a directory named `dataset` with the following structure: dataset/SPEAKER_NAME/FILENAME.wav and dataset/SPEAKER_NAME/FILENAME.TextGrid. For instance, the file `SSB00050001.wav` from AISHELL-3 would be located at `dataset/SSB0005/SSB00050001.wav`.
+
+For [AISHELL-3](https://www.openslr.org/93/) (Apache v2.0 license) and [biaobei](https://en.data-baker.com/datasets/freeDatasets/) (non-commercial use only), pretrained TextGrid files are available in this [repository](https://github.com/lars76/forced-alignment-chinese). However, you can also generate your own annotations if needed.
+
+Make sure that the .TextGrid files have the following sections: "hanzis", "pinyins", "phones".
 
 ### Installing packages
 
@@ -72,7 +87,7 @@ Here, `<sil>` denotes a silence marker.
 
 ### Preprocessing
 
-Preprocess your dataset with `preprocess.py`. This script is tailored for the AISHELL-3 dataset but can be adapted for other datasets. Make sure to change `DATASET_PATH` and `OUTPUT_PATH` in `preprocess.py`.
+Preprocess your dataset with `preprocess.py`. This script is tailored to the Chinese language, but can also be adapted for other languages. Make sure to change `DATASET_PATH` and `OUTPUT_PATH` in `preprocess.py` if your input/output files should be in a different folder.
 
 ### Training
 

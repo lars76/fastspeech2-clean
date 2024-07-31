@@ -253,22 +253,29 @@ def convert_ipa_to_tokens(
 
 
 def display_speaker_info(speakers: List[Dict[str, str]]):
+    if not speakers:
+        print("No speaker information available.")
+        return
+
+    # Determine available fields
+    available_fields = set().union(*speakers)
+    field_order = ["speaker_id", "name", "age group", "gender", "accent"]
+    display_fields = [field for field in field_order if field in available_fields]
+
+    # Create format string and header
+    format_string = " ".join("{:<15}" for _ in display_fields)
+    header = format_string.format(*[field.capitalize() for field in display_fields])
+
     print("Available speakers:")
-    print(
-        "{:<12} {:<12} {:<10} {:<10}".format(
-            "Speaker ID", "Age Group", "Gender", "Accent"
-        )
-    )
-    print("-" * 44)
+    print(header)
+    print("-" * (15 * len(display_fields)))
+
     for speaker in speakers:
-        print(
-            "{:<12} {:<12} {:<10} {:<10}".format(
-                speaker["speaker_id"],
-                speaker["age group"],
-                speaker["gender"].capitalize(),
-                speaker["accent"].capitalize(),
-            )
-        )
+        row_data = [speaker.get(field, "N/A") for field in display_fields]
+        row_data = [
+            str(item).capitalize() if item != "N/A" else item for item in row_data
+        ]
+        print(format_string.format(*row_data))
 
 
 def plot_mel_spectrogram(

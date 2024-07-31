@@ -440,8 +440,7 @@ def calculate_mos(mos_predictor, wav_data, sampling_rate):
 
 def parse_speakers(filename):
     speaker_df = pd.read_csv(filename, sep="\t")
-    columns_of_interest = ["speaker_id", "age group", "gender", "accent"]
-    dicts_list = speaker_df[columns_of_interest].to_dict(orient="records")
+    dicts_list = speaker_df.to_dict(orient="records")
 
     return dicts_list, speaker_df["speaker_id"]
 
@@ -522,13 +521,11 @@ def main():
     file_list = np.asarray(
         sorted(glob.glob(os.path.join(OUTPUT_PATH, "**", "*pt"), recursive=True))
     )
-    speaker_ids = np.asarray(
-        [int(os.path.basename(f).split("_")[0]) for f in file_list]
-    )
+    speaker_ids = np.asarray([os.path.basename(os.path.dirname(f)) for f in file_list])
     speaker_dict, unique_speakers = parse_speakers(
         os.path.join(OUTPUT_PATH, "speakers.tsv")
     )
-    num_speakers = unique_speakers.max() + 1
+    num_speakers = len(unique_speakers)
     logger.info(f"Number of speakers: {num_speakers}")
 
     train_files, val_files = get_train_val_files(
