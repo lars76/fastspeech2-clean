@@ -43,7 +43,7 @@ def load_model(
         .to(device)
         .eval()
     )
-    model.load_state_dict(state_dict["state_dict"])
+    model.load_state_dict(state_dict["state_dict"], strict=False)
 
     return (
         model,

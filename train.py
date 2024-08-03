@@ -442,7 +442,7 @@ def parse_speakers(filename):
     speaker_df = pd.read_csv(filename, sep="\t")
     dicts_list = speaker_df.to_dict(orient="records")
 
-    return dicts_list, speaker_df["speaker_id"]
+    return dicts_list, speaker_df["name"]
 
 
 def get_train_val_files(

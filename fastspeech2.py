@@ -6,22 +6,23 @@ import math
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
+    def __init__(self, d_model: int, dropout: float = 0.1):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
-
-        position = torch.arange(max_len).unsqueeze(1).float()
-        div_term = torch.exp(
-            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
-        )
-        pe = torch.zeros(max_len, d_model)
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0)
-        self.register_buffer("pe", pe)
+        self.d_model = d_model
 
     def forward(self, x: Tensor) -> Tensor:
-        x = x + self.pe[:, : x.size(1)]
+        max_len = x.size(1)
+        position = torch.arange(max_len).unsqueeze(1).float().to(x.device)
+        div_term = torch.exp(
+            torch.arange(0, self.d_model, 2).float().to(x.device)
+            * (-math.log(10000.0) / self.d_model)
+        )
+        pe = torch.zeros(1, max_len, self.d_model).to(x.device)
+        pe[0, :, 0::2] = torch.sin(position * div_term)
+        pe[0, :, 1::2] = torch.cos(position * div_term)
+
+        x = x + pe[:, : x.size(1)]
         return self.dropout(x)
 
 
@@ -54,13 +55,7 @@ class FFTBlock(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(
-        self,
-        hidden_dim: int,
-        n_layers: int,
-        n_heads: int,
-        d_inner: int,
-        dropout: float,
-        max_len: int,
+        self, hidden_dim: int, n_layers: int, n_heads: int, d_inner: int, dropout: float
     ):
         super().__init__()
         self.hidden_dim = hidden_dim
@@ -72,7 +67,7 @@ class Transformer(nn.Module):
                 for _ in range(n_layers)
             ]
         )
-        self.pos_encoder = PositionalEncoding(hidden_dim, dropout, max_len=max_len)
+        self.pos_encoder = PositionalEncoding(hidden_dim, dropout)
 
     def forward(self, x: Tensor, mask: Optional[Tensor] = None) -> Tensor:
         x = self.pos_encoder(x)
@@ -99,7 +94,6 @@ class Model(nn.Module):
         transformer_heads: int = 4,
         transformer_inner: int = 1024,
         transformer_dropout: float = 0.1,
-        max_len: int = 1024,
         duration_layers: int = 1,
         duration_kernel_size: int = 3,
         duration_dropout: float = 0.25,
@@ -130,7 +124,6 @@ class Model(nn.Module):
             n_heads=transformer_heads,
             d_inner=transformer_inner,
             dropout=transformer_dropout,
-            max_len=max_len,
         )
         self.decoder = Transformer(
             d_model,
@@ -138,7 +131,6 @@ class Model(nn.Module):
             n_heads=transformer_heads,
             d_inner=transformer_inner,
             dropout=transformer_dropout,
-            max_len=max_len * 2,
         )
 
         self.duration_predictor = self._make_predictor(

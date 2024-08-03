@@ -33,6 +33,8 @@ SILENCE_TOKEN = "<sil>"
 MAX_SILENCE_LENGTH = 40 * VOCODER.hop_size
 # Remove start and stop silence
 TRIM_SILENCE = False
+# Set silence in the waveforms to zero
+SILENT_TO_ZERO = False
 
 
 def approximate_integer_sum(
@@ -58,7 +60,7 @@ def approximate_integer_sum(
     Returns:
         The adjusted list of integers summing to the target_sum.
     """
-    rounded_integers = np.rint(rational_numbers)
+    rounded_integers = np.maximum(np.rint(rational_numbers), 1)
     float_differences = rational_numbers - rounded_integers
     current_sum = np.sum(rounded_integers)
 
@@ -117,26 +119,23 @@ def pinyin_to_phones_tones(
 
 def tier_to_dict(
     textgrid: tgt.TextGrid, tier_name: str
-) -> Tuple[List[Dict], List[Tuple[int, int]]]:
+) -> Tuple[List[Dict], List[Tuple[int, int]], List[Tuple[int, int]]]:
     """
     Converts a tier from a TextGrid to a list of dictionaries containing text and frame information.
-    Additionally, limits the maximum silence.
-
+    Additionally, limits the maximum silence and identifies silent regions.
     Args:
         textgrid: The TextGrid object containing the tier.
         tier_name: The name of the tier to extract.
-
     Returns:
         A list of dictionaries with text and frame information for each interval in the tier.
         A list of frames containing the locations where there is a phoneme or silence.
+        A list of silent regions.
     """
     tier = textgrid.get_tier_by_name(tier_name)
-
     result = []
-
     textgrid_offset = 0
-
     phone_regions = []
+    silent_regions = []
     for i, interval in enumerate(tier):
         start_frames = textgrid_offset + int(
             np.ceil(interval.start_time * VOCODER.sampling_rate)
@@ -144,33 +143,26 @@ def tier_to_dict(
         end_frames = textgrid_offset + int(
             np.ceil(interval.end_time * VOCODER.sampling_rate)
         )
-
         wav_start_frames = int(np.ceil(interval.start_time * VOCODER.sampling_rate))
         wav_end_frames = int(np.ceil(interval.end_time * VOCODER.sampling_rate))
-
         duration_frames = end_frames - start_frames
-
         if not interval.text:
             text = SILENCE_TOKEN
-
+            silent_regions.append((wav_start_frames, wav_end_frames))
             if (i == 0 or i == len(tier) - 1) and TRIM_SILENCE:
                 textgrid_offset -= duration_frames
                 continue
-
             if MAX_SILENCE_LENGTH < duration_frames:
                 textgrid_offset -= duration_frames - MAX_SILENCE_LENGTH
                 duration_frames = MAX_SILENCE_LENGTH
                 end_frames = start_frames + duration_frames
-
                 if i == 0:
                     wav_start_frames = wav_end_frames - MAX_SILENCE_LENGTH
                 else:
                     wav_end_frames = wav_start_frames + MAX_SILENCE_LENGTH
         else:
             text = interval.text.strip()
-
         duration_stft_frames = duration_frames / VOCODER.hop_size
-
         result.append(
             {
                 "text": text,
@@ -180,8 +172,7 @@ def tier_to_dict(
             }
         )
         phone_regions.append((wav_start_frames, wav_end_frames))
-
-    return result, phone_regions
+    return result, phone_regions, silent_regions
 
 
 def compute_mel(y: np.ndarray) -> np.ndarray:
@@ -296,11 +287,16 @@ def process_file(
     speaker_info[speaker_id]["num_files"] += 1
 
     textgrid = tgt.io.read_textgrid(filename, include_empty_intervals=True)
-    pinyins, phone_regions = tier_to_dict(textgrid, "pinyins")
-    hanzis, _ = tier_to_dict(textgrid, "hanzis")
-    phones, _ = tier_to_dict(textgrid, "phones")
+    pinyins, phone_regions, silent_regions = tier_to_dict(textgrid, "pinyins")
+    hanzis, _, _ = tier_to_dict(textgrid, "hanzis")
+    phones, _, _ = tier_to_dict(textgrid, "phones")
 
     wav = read_audio(str(wav_filename))
+
+    # Set silent regions to zero
+    if SILENT_TO_ZERO:
+        for silent_region_start, silent_region_stop in silent_regions:
+            wav[silent_region_start:silent_region_stop] = 0
 
     mask = np.zeros(len(wav), dtype=bool)
     for start, stop in phone_regions:
