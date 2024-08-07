@@ -34,7 +34,7 @@ MAX_SILENCE_LENGTH = 40 * VOCODER.hop_size
 # Remove start and stop silence
 TRIM_SILENCE = False
 # Set silence in the waveforms to zero
-SILENT_TO_ZERO = False
+SILENT_TO_ZERO = True
 
 
 def approximate_integer_sum(

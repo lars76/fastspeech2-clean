@@ -22,8 +22,8 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 | Model | UTMOS | CER | Val Loss | Params |
 |-------|-------|-----|----------|--------|
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2_ab_combined.pt) | **2.6578** | **0.2529** | 0.6335 | 25.36M |
-| Ground Truth | 2.5482 | 0.2909 | **0.0** | - |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2_ab_combined.pt) | **2.7095** | **0.2511** | 0.5460 | 25.36M |
+| Ground Truth | 2.5376 | 0.2900 | **0.0** | - |
 
 ### Notes
 
