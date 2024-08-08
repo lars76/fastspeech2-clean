@@ -115,7 +115,9 @@ class Model(nn.Module):
         self.embed_tones = nn.Embedding(
             num_tones, tone_embedding, padding_idx=self.padding_idx
         )
-        self.speaker_embedding = nn.Embedding(num_speakers, d_model)
+        self.num_speakers = num_speakers
+        if self.num_speakers > 1:
+            self.speaker_embedding = nn.Embedding(self.num_speakers, d_model)
         self.embed_pitch = nn.Linear(2, d_model)
 
         self.encoder = Transformer(
@@ -205,10 +207,11 @@ class Model(nn.Module):
             (self.embed_tokens(tokens), self.embed_tones(tones)), dim=-1
         )
         padding_mask = tokens == self.padding_idx
-        encoder_outputs = (
-            self.encoder(text_embed, padding_mask)
-            + self.speaker_embedding(speakers.long())[:, None]
-        )
+        encoder_outputs = self.encoder(text_embed, padding_mask)
+
+        if self.num_speakers > 1:
+            encoder_outputs += self.speaker_embedding(speakers.long())[:, None]
+
         duration_prediction = self.duration_predictor(
             encoder_outputs.transpose(1, 2)
         ).squeeze(1)

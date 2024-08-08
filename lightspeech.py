@@ -80,7 +80,9 @@ class Model(nn.Module):
         super().__init__()
         self.padding_idx = padding_idx
 
-        self.speaker_embedding = nn.Embedding(num_speakers, d_model)
+        self.num_speakers = num_speakers
+        if self.num_speakers > 1:
+            self.speaker_embedding = nn.Embedding(self.num_speakers, d_model)
         self.embed_tokens = nn.Embedding(
             num_phones, d_model - tone_embedding, padding_idx=self.padding_idx
         )
@@ -183,7 +185,9 @@ class Model(nn.Module):
         for encoder_layer in self.encoder:
             x = encoder_layer(x)
         encoder_outputs = self.layer_norm(x).transpose(1, 2)
-        encoder_outputs += self.speaker_embedding(speakers.long()).unsqueeze(1)
+
+        if self.num_speakers > 1:
+            encoder_outputs += self.speaker_embedding(speakers.long()).unsqueeze(1)
 
         duration_prediction = self.duration_predictor(
             encoder_outputs.transpose(1, 2)
