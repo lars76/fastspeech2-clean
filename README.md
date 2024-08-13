@@ -10,20 +10,14 @@ Currently, pre-processing and training are only implemented for Chinese speech d
 
 If you have suggestions to further enhance speech quality, please contribute by opening an issue or pull request.
 
-### Models trained on AISHELL-3
+### AISHELL-3 (85.62 hours) and biaobei (11.86 hours)
 
 | Model | UTMOS | CER | Val Loss | Params |
 |-------|-------|-----|----------|--------|
-| [LightSpeech](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt) | 2.3098 | 0.2594 | 0.6640 | 3.37M |
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt) | **2.5620** | **0.2550** | 0.6374 | 25.36M |
-| Ground Truth | 2.4276 | 0.2917 | **0.0** | - |
-
-### Models trained on AISHELL-3 and biaobei combined
-
-| Model | UTMOS | CER | Val Loss | Params |
-|-------|-------|-----|----------|--------|
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2_ab_combined.pt) | **2.7095** | **0.2511** | 0.5460 | 25.36M |
-| Ground Truth | 2.5376 | 0.2900 | **0.0** | - |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt) | **2.7095** | **0.2511** | 0.5460 | 25.36M |
+| [LightSpeech, dim=512](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt) | 2.5745 | 0.2517 | 0.5569 | 6.36M |
+| [LightSpeech, dim=256](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_small.pt) | 2.3478 | 0.2591 | 0.5716 | 1.67M |
+| Ground Truth | 2.5376 | 0.2895 | **0.0** | - |
 
 ### Notes
 

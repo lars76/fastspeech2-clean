@@ -65,7 +65,7 @@ class Model(nn.Module):
         num_mel_bins: int,
         num_tones: int = 7,
         tone_embedding: int = 16,
-        d_model: int = 256,
+        d_model: int = 512,
         layer_dropout: float = 0.2,
         encoder_kernel_sizes: List[int] = [5, 25, 13, 9],
         decoder_kernel_sizes: List[int] = [17, 21, 9, 3],
@@ -136,12 +136,7 @@ class Model(nn.Module):
         for _ in range(num_layers):
             layers.extend(
                 [
-                    nn.Conv1d(
-                        hidden_size,
-                        hidden_size,
-                        kernel_size=kernel_size,
-                        padding="same",
-                    ),
+                    ConvSeparable(hidden_size, hidden_size, kernel_size),
                     nn.ReLU(inplace=True),
                     LayerNorm1d(hidden_size),
                     nn.Dropout(dropout),
