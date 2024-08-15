@@ -25,7 +25,7 @@ If you have suggestions to further enhance speech quality, please contribute by 
 |-------|-------|-----|----------|--------|
 | [LightSpeech, d_model=512](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_new.pt) | **2.7720** | **0.2568** | 0.6322 | 6.36M |
 | [LightSpeech, d_model=256](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_new_small.pt) | 2.6359 | 0.2607 | 0.6485 | 1.67M |
-| Ground Truth | 0.2911 | 2.5396 | **0.0** | - |
+| Ground Truth | 2.5396 | 0.2911 | **0.0** | - |
 
 ### Notes
 
@@ -38,7 +38,7 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 | **Hanzi**                          | **Pinyin**                                                | **IPA**                                             |
 |------------------------------------|-----------------------------------------------------------|-----------------------------------------------------|
-| 展览将对全体观众 实行免费入场 提供义务讲解         | zhan2 lan3 jiang1 dui4 quan2 ti3 guan1 zhong4 <sil> shi2 xing2 mian3 fei4 ru4 chang3 <sil> ti2 gong1 yi4 wu4 jiang2 jie3 | ʈʂan2 lan3 tɕjaŋ1 twei̯4 tɕʰɥɛn2 tʰi3 kwan1 ʈʂʊŋ4 <sil>1 ʂɻ̩2 ɕiŋ2 mjɛn3 fei̯4 ɻu4 ʈʂʰaŋ3 <sil>1 tʰi2 kʊŋ1 i4 u4 tɕjaŋ2 tɕje3 |
+| 展览将对全体观众 实行免费入场 提供义务讲解         | zhan2 lan3 jiang1 dui4 quan2 ti3 guan1 zhong4 &lt;sil&gt; shi2 xing2 mian3 fei4 ru4 chang3 &lt;sil&gt; ti2 gong1 yi4 wu4 jiang2 jie3 | ʈʂan2 lan3 tɕjaŋ1 twei̯4 tɕʰɥɛn2 tʰi3 kwan1 ʈʂʊŋ4 &lt;sil&gt;1 ʂɻ̩2 ɕiŋ2 mjɛn3 fei̯4 ɻu4 ʈʂʰaŋ3 &lt;sil&gt;1 tʰi2 kʊŋ1 i4 u4 tɕjaŋ2 tɕje3 |
 
 #### LightSpeech, d_model=512
 
