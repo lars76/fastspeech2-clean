@@ -622,6 +622,7 @@ def main():
                     "num_phones": num_phones,
                     "num_speakers": num_speakers,
                     "num_mel_bins": VOCODER.num_mels,
+                    "d_model":model.d_model
                 }
                 | epoch_info,
                 "model.pt",

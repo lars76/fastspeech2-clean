@@ -39,6 +39,7 @@ def load_model(
             num_phones=state_dict["num_phones"],
             num_speakers=state_dict["num_speakers"],
             num_mel_bins=state_dict["num_mel_bins"],
+            d_model=state_dict["d_model"]
         )
         .to(device)
         .eval()

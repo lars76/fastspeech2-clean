@@ -79,6 +79,7 @@ class Model(nn.Module):
     ):
         super().__init__()
         self.padding_idx = padding_idx
+        self.d_model = d_model
 
         self.num_speakers = num_speakers
         if self.num_speakers > 1:

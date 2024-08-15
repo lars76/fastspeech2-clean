@@ -104,6 +104,7 @@ class Model(nn.Module):
     ):
         super().__init__()
         self.padding_idx = padding_idx
+        self.d_model = d_model
         self.embed_tokens = nn.Embedding(
             num_phones, d_model - tone_embedding, padding_idx=self.padding_idx
         )
