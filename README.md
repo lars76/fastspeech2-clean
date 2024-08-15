@@ -42,15 +42,15 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 #### LightSpeech, d_model=512
 
-https://github.com/user-attachments/assets/b4e8bbd1-070b-405c-9c01-a941dffb1a74
+https://github.com/user-attachments/assets/2e1b000f-6f95-401e-b2a1-4afae6dbd711
 
-#### LightSpeech, d_model=256
+#### FastSpeech
 
-https://github.com/user-attachments/assets/01cb62b7-f801-4584-8a65-3de647a1cc1e
+https://github.com/user-attachments/assets/886e0a43-5dc3-4589-ad64-ac1b428dd7ca
 
 #### Ground truth
 
-https://github.com/user-attachments/assets/09a4659c-c455-47cc-9032-611c3f0cc23d
+https://github.com/user-attachments/assets/18ae2280-7f5a-4275-ba85-da8aa50b00c5
 
 ## Prediction
 
