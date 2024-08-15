@@ -48,9 +48,9 @@ https://github.com/user-attachments/assets/2e1b000f-6f95-401e-b2a1-4afae6dbd711
 
 https://github.com/user-attachments/assets/886e0a43-5dc3-4589-ad64-ac1b428dd7ca
 
-#### Ground truth
+#### Ground truth (reconstructed ground truth mel spectogram)
 
-https://github.com/user-attachments/assets/18ae2280-7f5a-4275-ba85-da8aa50b00c5
+https://github.com/user-attachments/assets/636ea387-9219-4f5e-a778-463b012b1ce6
 
 ## Prediction
 
