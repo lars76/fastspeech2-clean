@@ -146,22 +146,35 @@ class Model(nn.Module):
         return nn.Sequential(*layers)
 
     def _length_regulator(self, x: Tensor, mel_time: int, durations: Tensor) -> Tensor:
-        bsz, time, feats = x.size()
-        indices = torch.arange(time, device=x.device)
-        repeated_indices = torch.full(
-            (bsz, mel_time, feats),
-            fill_value=time - 1,
-            dtype=torch.long,
-            device=x.device,
-        )
+        bsz, time, feats = x.shape
+        if bsz > 1:
+            cumulative_durations = torch.cumsum(durations, dim=1)
 
-        for k in range(bsz):
-            res = torch.repeat_interleave(indices, durations[k].long(), dim=0)[
-                :mel_time
-            ]
-            repeated_indices[k, : res.shape[0]] = res.unsqueeze(-1)
+            # Create a range tensor for each batch item
+            expanded_range = (
+                torch.arange(mel_time, device=x.device).unsqueeze(0).expand(bsz, -1)
+            )
 
-        return torch.gather(x, 1, repeated_indices)
+            # Create a mask for valid positions
+            mask = expanded_range.unsqueeze(1) >= cumulative_durations.unsqueeze(2)
+
+            # Calculate source indices
+            source_indices = mask.long().sum(dim=1)
+
+            # Clamp the indices to handle cases where mel_time > total_duration
+            source_indices = torch.clamp(source_indices, 0, time - 1)
+
+            # Create the gather indices tensor
+            gather_indices = source_indices.unsqueeze(-1).expand(-1, -1, feats)
+
+            # Gather the input tensor based on the calculated indices
+            return torch.gather(x, 1, gather_indices)
+        else:
+            indices = torch.arange(time, device=x.device)
+            repeated_indices = torch.repeat_interleave(
+                indices, durations[0].long(), dim=0
+            )
+            return x[:, repeated_indices]
 
     def forward(
         self,
@@ -189,14 +202,12 @@ class Model(nn.Module):
         ).squeeze(1)
 
         if mels is not None and durations is not None:
-            durations = torch.maximum(torch.round(durations), torch.tensor(0)).long()
+            durations = torch.clamp(torch.round(durations), min=0).long()
             mel_time = mels.shape[1]
             assert torch.max(torch.sum(durations, dim=1)).item() == mel_time
         else:
             duration_prediction = torch.exp(duration_prediction) - 1
-            durations = torch.maximum(
-                torch.round(duration_prediction), torch.tensor(0)
-            ).long()
+            durations = torch.clamp(torch.round(duration_prediction), min=0).long()
             mel_time = torch.max(torch.sum(durations, dim=1)).long()
 
         decoder_inp = self._length_regulator(encoder_outputs, mel_time, durations)

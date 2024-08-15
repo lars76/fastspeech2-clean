@@ -43,7 +43,7 @@ def load_model(
         .to(device)
         .eval()
     )
-    model.load_state_dict(state_dict["state_dict"], strict=False)
+    model.load_state_dict(state_dict["state_dict"], strict=True)
 
     return (
         model,
@@ -432,7 +432,7 @@ def main():
             "                 Plot the pitch and spectogram of the synthesized audio. Default is to not plot.\n"
             "  --device       Device to use for processing: 'cpu' or 'cuda:k' where k is the GPU number. Default is 'cpu'.\n"
             "  --output       Filename for the output audio file (WAV format). Default is 'output.wav'.\n"
-            "  --vocoder      Vocoder model for audio synthesis. Default is 'bigvgan_base_22khz_80band'.\n"
+            "  --vocoder      Vocoder model for audio synthesis. Default is 'hifigan_lj_ft_t2_v1'.\n"
             "  --list-speakers Display information about available speakers and exit."
         ),
         formatter_class=argparse.RawTextHelpFormatter,
@@ -481,7 +481,7 @@ def main():
     parser.add_argument(
         "--model_class",
         type=str,
-        default="FastSpeech2",
+        default="LightSpeech",
         help=("Name of the model class (FastSpeech2 or LightSpeech)."),
     )
 
@@ -497,9 +497,9 @@ def main():
     parser.add_argument(
         "--speaker",
         type=int,
-        default=0,
+        default=218,
         help=(
-            "Speaker ID to use for synthesis. An integer between 0 and 217, each representing a unique speaker.\n"
+            "Speaker ID to use for synthesis. An integer between 0 and 218, each representing a unique speaker.\n"
             "Default is 0. Use --list-speakers to see available options."
         ),
     )
@@ -529,10 +529,10 @@ def main():
     parser.add_argument(
         "--vocoder",
         type=str,
-        default="bigvgan_base_22khz_80band",
+        default="hifigan_lj_ft_t2_v1",
         help=(
             "Vocoder model for final audio synthesis. Vocoders convert the model output into a waveform.\n"
-            "Default is 'bigvgan_base_22khz_80band'."
+            "Default is 'hifigan_lj_ft_t2_v1'."
         ),
     )
 

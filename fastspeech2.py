@@ -178,20 +178,35 @@ class Model(nn.Module):
         return nn.Sequential(*layers)
 
     def _length_regulator(self, x: Tensor, mel_time: int, durations: Tensor) -> Tensor:
-        bsz, time, feats = x.size()
-        indices = torch.arange(time, device=x.device)
-        repeated_indices = torch.full(
-            (bsz, mel_time, feats),
-            fill_value=time - 1,
-            dtype=torch.long,
-            device=x.device,
-        )
-        for k in range(bsz):
-            res = torch.repeat_interleave(indices, durations[k].long(), dim=0)[
-                :mel_time
-            ]
-            repeated_indices[k, : res.shape[0]] = res[..., None]
-        return torch.gather(x, 1, repeated_indices)
+        bsz, time, feats = x.shape
+        if bsz > 1:
+            cumulative_durations = torch.cumsum(durations, dim=1)
+
+            # Create a range tensor for each batch item
+            expanded_range = (
+                torch.arange(mel_time, device=x.device).unsqueeze(0).expand(bsz, -1)
+            )
+
+            # Create a mask for valid positions
+            mask = expanded_range.unsqueeze(1) >= cumulative_durations.unsqueeze(2)
+
+            # Calculate source indices
+            source_indices = mask.long().sum(dim=1)
+
+            # Clamp the indices to handle cases where mel_time > total_duration
+            source_indices = torch.clamp(source_indices, 0, time - 1)
+
+            # Create the gather indices tensor
+            gather_indices = source_indices.unsqueeze(-1).expand(-1, -1, feats)
+
+            # Gather the input tensor based on the calculated indices
+            return torch.gather(x, 1, gather_indices)
+        else:
+            indices = torch.arange(time, device=x.device)
+            repeated_indices = torch.repeat_interleave(
+                indices, durations[0].long(), dim=0
+            )
+            return x[:, repeated_indices]
 
     def forward(
         self,

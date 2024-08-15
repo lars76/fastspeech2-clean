@@ -14,30 +14,37 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 | Model | UTMOS | CER | Val Loss | Params |
 |-------|-------|-----|----------|--------|
-| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt) | **2.7095** | **0.2511** | 0.5460 | 25.36M |
-| [LightSpeech, dim=512](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt) | 2.5745 | 0.2517 | 0.5569 | 6.36M |
-| [LightSpeech, dim=256](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_small.pt) | 2.3478 | 0.2591 | 0.5716 | 1.67M |
+| [FastSpeech2](https://github.com/lars76/fastspeech2-clean/releases/download/models/fastspeech2.pt) | **2.8628** | **0.2600** | 0.5460 | 25.36M |
+| [LightSpeech, d_model=512](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech.pt) | 2.7543 | 0.2603 | 0.5569 | 6.36M |
+| [LightSpeech, d_model=256](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_small.pt) | 2.6096 | 0.2654 | 0.5716 | 1.67M |
 | Ground Truth | 2.5376 | 0.2895 | **0.0** | - |
+
+### Even more data (total: 156.37 hours)
+
+| Model | UTMOS | CER | Val Loss | Params |
+|-------|-------|-----|----------|--------|
+| [LightSpeech, d_model=512](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_new.pt) | **2.7720** | **0.2568** | 0.6322 | 6.36M |
+| [LightSpeech, d_model=256](https://github.com/lars76/fastspeech2-clean/releases/download/models/lightspeech_new_small.pt) | 2.6359 | 0.2607 | 0.6485 | 1.67M |
+| Ground Truth | 0.2911 | 2.5396 | **0.0** | - |
 
 ### Notes
 
 - MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better).
 - The "ground truth" refers to the reconstruction of the true mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`.
-- For predicting generated spectrograms, `bigvgan_base_22khz_80band` is used due to its superior performance on distorted spectrograms. See also my other [repository](https://github.com/lars76/bigvgan-mirror/).
+- For the prediction of the generated spectrograms, `hifigan_universal_v1` was used. Note that `hifigan_lj_ft_t2_v1`, `hifigan_lj_v1` or `bigvgan_base_22khz_80band` can give better results. See also my other [repository](https://github.com/lars76/bigvgan-mirror/).
 - Approximately 20% of the dataset is used for validation.
 
 ## Audio Samples
 
 | **Hanzi**                          | **Pinyin**                                                | **IPA**                                             |
 |------------------------------------|-----------------------------------------------------------|-----------------------------------------------------|
-| 按被征农地的原有用途来确定补偿         | an4 bei4 zheng1 nong2 di4 de5 yuan2 you3 yong4 tu2 lai2 que4 ding4 bu3 chang2 | an4 pei̯4 ʈʂəŋ1 nʊŋ2 ti4 tɤ5 ɥɛn2 jou̯3 jʊŋ4 tʰu2 lai̯2 tɕʰɥe4 tiŋ4 pu3 ʈʂʰaŋ2 |
+| 展览将对全体观众 实行免费入场 提供义务讲解         | zhan2 lan3 jiang1 dui4 quan2 ti3 guan1 zhong4 <sil> shi2 xing2 mian3 fei4 ru4 chang3 <sil> ti2 gong1 yi4 wu4 jiang2 jie3 | ʈʂan2 lan3 tɕjaŋ1 twei̯4 tɕʰɥɛn2 tʰi3 kwan1 ʈʂʊŋ4 <sil>1 ʂɻ̩2 ɕiŋ2 mjɛn3 fei̯4 ɻu4 ʈʂʰaŋ3 <sil>1 tʰi2 kʊŋ1 i4 u4 tɕjaŋ2 tɕje3 |
 
-
-#### LightSpeech
+#### LightSpeech, d_model=512
 
 https://github.com/user-attachments/assets/b4e8bbd1-070b-405c-9c01-a941dffb1a74
 
-#### FastSpeech2
+#### LightSpeech, d_model=256
 
 https://github.com/user-attachments/assets/01cb62b7-f801-4584-8a65-3de647a1cc1e
 
@@ -90,7 +97,7 @@ Run `CUBLAS_WORKSPACE_CONFIG=:4096:8 python train.py` to train the network. The 
 ## Literature
 
 - **LightSpeech**: [LightSpeech](https://arxiv.org/abs/2102.04040) has demonstrated that CNN architectures can achieve similar performance to transformers with reduced computational overhead.
-- **BigVGAN Vocoder**: I use [BigVGAN](https://arxiv.org/abs/2206.04658) for better vocoding quality over Hifi-GAN.
+- **BigVGAN Vocoder**: [BigVGAN] (https://arxiv.org/abs/2206.04658) is also implemented for comparison. However, Hifi-GAN tends to be faster.
 - **Pitch estimation**: Many FastSpeech implementations use DIO + StoneMask, but these perform significantly worse than neural network based approaches. Here I use [PENN](https://arxiv.org/pdf/2301.12258), the current state of the art.
 - **Objective Metrics**: Instead of looking only at the mel spectrogram loss, we employ [UTMOS](https://arxiv.org/abs/2204.02152) for MOS estimation and [Whisper](https://arxiv.org/abs/2212.04356) for Character Error Rate (CER). The best parameters are selected based on speech quality (MOS), intelligibility (CER) and validation loss. I have found that MOS alone is only weakly correlated with speech quality. [This paper](https://www.arxiv.org/abs/2407.12707) also came to the same conclusion.
 

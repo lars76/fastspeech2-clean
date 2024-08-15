@@ -12,7 +12,7 @@ from tqdm import tqdm
 DATASET_PATH = "dataset/"
 OUTPUT_PATH = "processed/"
 
-VOCODER_NAME = "bigvgan_base_22khz_80band"
+VOCODER_NAME = "hifigan_universal_v1"
 VOCODER = torch.hub.load(
     "lars76/bigvgan-mirror",
     VOCODER_NAME,
