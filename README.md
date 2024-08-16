@@ -54,7 +54,7 @@ https://github.com/user-attachments/assets/09a4659c-c455-47cc-9032-611c3f0cc23d
 
 ## Prediction
 
-After [downloading a model](https://github.com/lars76/fastspeech2-clean/releases), you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed.
+After [downloading a model](https://github.com/lars76/fastspeech2-clean/releases), you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed. The script `convert_to_onnx.py` can be used for deployment.
 
 ### Example Commands
 
@@ -97,7 +97,7 @@ Run `CUBLAS_WORKSPACE_CONFIG=:4096:8 python train.py` to train the network. The 
 ## Literature
 
 - **LightSpeech**: [LightSpeech](https://arxiv.org/abs/2102.04040) has demonstrated that CNN architectures can achieve similar performance to transformers with reduced computational overhead.
-- **BigVGAN Vocoder**: [BigVGAN] (https://arxiv.org/abs/2206.04658) is also implemented for comparison. However, Hifi-GAN tends to be faster.
+- **BigVGAN Vocoder**: [BigVGAN](https://arxiv.org/abs/2206.04658) is also implemented for comparison. However, Hifi-GAN tends to be faster.
 - **Pitch estimation**: Many FastSpeech implementations use DIO + StoneMask, but these perform significantly worse than neural network based approaches. Here I use [PENN](https://arxiv.org/pdf/2301.12258), the current state of the art.
 - **Objective Metrics**: Instead of looking only at the mel spectrogram loss, we employ [UTMOS](https://arxiv.org/abs/2204.02152) for MOS estimation and [Whisper](https://arxiv.org/abs/2212.04356) for Character Error Rate (CER). The best parameters are selected based on speech quality (MOS), intelligibility (CER) and validation loss. I have found that MOS alone is only weakly correlated with speech quality. [This paper](https://www.arxiv.org/abs/2407.12707) also came to the same conclusion.
 
