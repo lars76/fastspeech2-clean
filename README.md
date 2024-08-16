@@ -54,7 +54,7 @@ https://github.com/user-attachments/assets/636ea387-9219-4f5e-a778-463b012b1ce6
 
 ## Prediction
 
-After [downloading a model](https://github.com/lars76/fastspeech2-clean/releases), you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed. The script `convert_to_onnx.py` can be used for deployment.
+After [downloading a model](https://github.com/lars76/fastspeech2-clean/releases), you can generate speech using Chinese characters, pinyin, or International Phonetic Alphabet (IPA). Only PyTorch is required, but optionally matplotlib, librosa and g2pw are needed.
 
 ### Example Commands
 
@@ -69,6 +69,22 @@ See `python predict.py --help` for all commands.
 The supported phones are `['<sil>', 'n', 'a', 'ŋ', 'j', 'i', 'w', 't', 'ɤ', 'ʂ', 'ə', 'tɕ', 'u', 'ɛ', 'ou̯', 'l', 'ʈʂ', 'ɕ', 'p', 'au̯', 'k', 'ei̯', 'ai̯', 'o', 'tɕʰ', 'm', 'ʊ', 'tʰ', 'ts', 'ʐ̩', 'ʈʂʰ', 's', 'y', 'f', 'e', 'ɻ̩', 'x', 'ɥ', 'ɹ̩', 'h', 'kʰ', 'pʰ', 'tsʰ', 'ɻ', 'ʐ', 'aɚ̯', 'ɚ', 'z̩', 'ɐ', 'ou̯˞', 'ɔ', 'ɤ̃', 'u˞', 'œ', 'ɑ̃', 'ʊ̃']`
 
 Here, `<sil>` denotes a silence marker.
+
+## ONNX Deployment
+
+The script `convert_to_onnx.py` can be used to convert our models into the ONNX format, allowing deployment in various environments, including browsers via WebAssembly. Below is a comparison of the inference speed in Firefox using WebAssembly. The vocoder used is HifiGAN with three variants: v1, v2, and v3.
+
+| Model                       | Vocoder | Load Time (ms) | Avg. Inference Time (ms) |
+|-----------------------------|---------|----------------|--------------------------|
+| LightSpeech (d_model=512)   | v1      | 517.00         | 2348.38                  |
+| LightSpeech (d_model=512)   | v2      | 125.00         | 223.74                   |
+| LightSpeech (d_model=512)   | v3      | 124.00         | 230.26                   |
+| LightSpeech (d_model=256)   | v1      | 237.00         | 2437.76                  |
+| LightSpeech (d_model=256)   | v2      | 113.00         | **190.44**               |
+| LightSpeech (d_model=256)   | v3      | **83.00**      | 209.72                   |
+| FastSpeech2                 | v1      | 704.00         | 2992.72                  |
+| FastSpeech2                 | v2      | 481.00         | 371.70                   |
+| FastSpeech2                 | v3      | 504.00         | 379.18                   |
 
 ## Instructions for training
 
