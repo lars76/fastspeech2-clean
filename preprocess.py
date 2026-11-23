@@ -20,6 +20,7 @@ VOCODER = torch.hub.load(
 # Pitch
 PITCH_FMIN = 75
 PITCH_FMAX = 500
+PENN_LAG_SAMPLES = 88
 DEVICE = "cuda:0"
 BATCH_SIZE = 2048
 
@@ -33,9 +34,7 @@ TRIM_SILENCE = False
 SILENT_TO_ZERO = True
 
 
-def approximate_integer_sum(
-    rational_numbers: np.ndarray, target_sum: int, valid_indices: np.ndarray
-) -> np.ndarray:
+def approximate_integer_sum(rational_numbers: np.ndarray, target_sum: int) -> np.ndarray:
     """
     Adjusts a list of rational numbers to sum to a specified target integer sum.
 
@@ -45,45 +44,26 @@ def approximate_integer_sum(
     Short-Time Fourier Transform (STFT) with HOP_LENGTH and WIN_LENGTH introduces rounding
     errors, causing the sum of phoneme durations to deviate from the total sequence length.
 
-    This function rounds each phoneme duration and adjusts the rounding to ensure the total
-    sum matches the target sum (the total length of the STFT).
+    This function rounds the cumulative phoneme boundaries instead of each duration, so the
+    rounding errors do not add up, and the total sum matches the target sum (the total length
+    of the STFT).
 
     Args:
         rational_numbers: The rational numbers representing phoneme durations.
         target_sum: The target sum that the adjusted integers should sum to.
-        valid_indices: Indices to consider for adjusting the rounding.
 
     Returns:
         The adjusted list of integers summing to the target_sum.
     """
-    rounded_integers = np.maximum(np.rint(rational_numbers), 1)
-    float_differences = rational_numbers - rounded_integers
-    current_sum = np.sum(rounded_integers)
-
-    error = int(current_sum - target_sum)
-
-    if error > 0:
-        to_round_down = np.argsort(float_differences)
-        to_round_down = to_round_down[valid_indices]
-        to_round_down = to_round_down[:error]
-        rounded_integers[to_round_down] -= 1
-    elif error < 0:
-        to_round_up = np.argsort(-float_differences)
-        to_round_up = to_round_up[valid_indices]
-        to_round_up = to_round_up[: abs(error)]
-        rounded_integers[to_round_up] += 1
-
-    current_sum = np.sum(rounded_integers)
-    final_error = int(current_sum - target_sum)
-
-    if final_error < 0:
-        smallest_idx = np.argmin(rounded_integers)
-        rounded_integers[smallest_idx] += abs(final_error)
-    elif final_error > 0:
-        largest_idx = np.argmax(rounded_integers)
-        rounded_integers[largest_idx] -= final_error
-
-    return rounded_integers
+    n = len(rational_numbers)
+    index = np.arange(n)
+    boundaries = np.rint(
+        np.cumsum(rational_numbers) * target_sum / np.sum(rational_numbers)
+    ).astype(np.int64)
+    boundaries = np.maximum.accumulate(np.maximum(boundaries - index, 1)) + index
+    boundaries = np.minimum(boundaries, target_sum - n + 1 + index)
+    boundaries[-1] = target_sum
+    return np.diff(boundaries, prepend=0)
 
 
 def pinyin_to_phones_tones(
@@ -171,63 +151,32 @@ def tier_to_dict(
     return result, phone_regions, silent_regions
 
 
-def compute_mel(y: np.ndarray) -> np.ndarray:
-    mel_basis = librosa.filters.mel(
-        sr=VOCODER.sampling_rate,
-        n_fft=VOCODER.n_fft,
-        n_mels=VOCODER.num_mels,
-        fmin=VOCODER.fmin,
-        fmax=VOCODER.fmax,
-    )
-
-    pad_length = int((VOCODER.n_fft - VOCODER.hop_size) / 2)
-    y = np.pad(y, (pad_length, pad_length), mode="reflect")
-
-    D = librosa.stft(
-        y,
-        n_fft=VOCODER.n_fft,
-        hop_length=VOCODER.hop_size,
-        win_length=VOCODER.win_size,
-        window="hann",
-        center=False,
-        pad_mode="reflect",
-    )
-
-    S = np.sqrt(np.abs(D) ** 2 + 1e-9)
-    S = np.dot(mel_basis, S)
-    S = np.log(np.maximum(S, 1e-5))
-
-    return S
-
-
-def compute_pitch(
-    audio: np.ndarray, resample: int = -1
-) -> Tuple[np.ndarray, np.ndarray]:
+def compute_pitch(audio: np.ndarray, num_frames: int) -> Tuple[np.ndarray, np.ndarray]:
     audio = torch.from_numpy(audio)[None].to(DEVICE)
+    hopsize = VOCODER.hop_size / VOCODER.sampling_rate
 
-    # Penn downsamples our frequency to 16000Hz and uses a hop size of 160
+    # Penn downsamples our frequency to 8000Hz and uses the mel hop size
     pitch, periodicity = penn.from_audio(
         audio=audio,
         sample_rate=VOCODER.sampling_rate,
+        hopsize=hopsize,
         fmin=PITCH_FMIN,
         fmax=PITCH_FMAX,
         gpu=None if DEVICE == "cpu" else DEVICE.replace("cuda:", ""),
         batch_size=BATCH_SIZE,
+        center="half-hop",
     )
     pitch = pitch.cpu().squeeze().numpy()
     periodicity = periodicity.cpu().squeeze().numpy()
 
-    if resample > 0:
-        pitch = np.interp(
-            np.linspace(0, pitch.shape[0], resample), np.arange(pitch.shape[0]), pitch
-        )
-        periodicity = np.interp(
-            np.linspace(0, periodicity.shape[0], resample),
-            np.arange(periodicity.shape[0]),
-            periodicity,
-        )
+    padding = int((penn.WINDOW_SIZE - hopsize * penn.SAMPLE_RATE) / 2)
+    offset = (penn.WINDOW_SIZE - 1) / 2 - padding - PENN_LAG_SAMPLES
+    penn_times = np.arange(pitch.shape[0]) * hopsize + offset / penn.SAMPLE_RATE
+    mel_times = (np.arange(num_frames) + 0.5) * hopsize
 
-    return pitch, periodicity
+    return np.interp(mel_times, penn_times, pitch), np.interp(
+        mel_times, penn_times, periodicity
+    )
 
 
 def read_audio(file_path: str, subtract_dc: bool = False) -> np.ndarray:
@@ -283,9 +232,9 @@ def process_file(
     speaker_info[speaker_id]["num_files"] += 1
 
     textgrid = tgt.io.read_textgrid(filename, include_empty_intervals=True)
-    pinyins, phone_regions, silent_regions = tier_to_dict(textgrid, "pinyins")
+    pinyins, _, _ = tier_to_dict(textgrid, "pinyins")
     hanzis, _, _ = tier_to_dict(textgrid, "hanzis")
-    phones, _, _ = tier_to_dict(textgrid, "phones")
+    phones, phone_regions, silent_regions = tier_to_dict(textgrid, "phones")
 
     wav = read_audio(str(wav_filename))
 
@@ -303,14 +252,14 @@ def process_file(
     pinyin_to_phones, tones = pinyin_to_phones_tones(pinyins, phones)
     pinyin_stats = pinyin_to_phones
 
-    mel = compute_mel(wav)
-    pitch, periodicity = compute_pitch(wav, resample=mel.shape[1])
+    mel = VOCODER.mel(torch.from_numpy(wav)).numpy()
+    pitch, periodicity = compute_pitch(wav, mel.shape[1])
 
     assert pitch.shape[0] == mel.shape[1]
 
     durations = np.array([p["duration_stft_frames"] for p in phones])
-    valid_indices = np.array([p["text"] != SILENCE_TOKEN for p in phones])
-    rounded_durations = approximate_integer_sum(durations, mel.shape[1], valid_indices)
+    assert abs(np.sum(durations) - mel.shape[1]) < 1
+    rounded_durations = approximate_integer_sum(durations, mel.shape[1])
 
     assert (rounded_durations > 0).all()
     assert np.sum(rounded_durations) == mel.shape[1]

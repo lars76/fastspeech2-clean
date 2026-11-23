@@ -621,7 +621,9 @@ def main():
                     "num_phones": num_phones,
                     "num_speakers": num_speakers,
                     "num_mel_bins": VOCODER.num_mels,
-                    "d_model":model.d_model
+                    "d_model":model.d_model,
+                    "pitch_mean_std": train_dataset.pitch_mean_std,
+                    "periodicity_range": train_dataset.periodicity_range,
                 }
                 | epoch_info,
                 "model.pt",
