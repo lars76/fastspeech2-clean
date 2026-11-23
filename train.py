@@ -391,8 +391,8 @@ def evaluate_cer_mos(model, val_files, use_gt=False):
             # to be consistent, remove start and stop silence if found
             # it can affect the evaluation
             if not TRIM_SILENCE:
-                dur_pred = dur_pred.cpu().numpy().flatten()
-                mel_pred = mel_pred[:, int(dur_pred[0]) : -int(dur_pred[-1])]
+                dur_pred = np.rint(dur_pred.float().cpu().numpy().flatten()).clip(min=0)
+                mel_pred = mel_pred[:, int(dur_pred[0]) : mel_pred.shape[1] - int(dur_pred[-1])]
 
             pred_wav = (
                 vocoder_predictor(mel_pred.transpose(1, 2))

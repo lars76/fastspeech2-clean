@@ -58,9 +58,9 @@ def load_model(model_path, vocoder_name):
         raise RuntimeError(f"Failed to load model: {e}")
 
 
-def prepare_inputs(sequence_length=8):
+def prepare_inputs(num_phones, sequence_length=8):
     return {
-        "tokens": torch.randint(1, 50, (1, sequence_length), dtype=torch.long),
+        "tokens": torch.randint(1, num_phones, (1, sequence_length), dtype=torch.long),
         "tones": torch.randint(1, 6, (1, sequence_length), dtype=torch.long),
         "speakers": torch.tensor([0], dtype=torch.long),
     }
@@ -78,8 +78,8 @@ def export_to_onnx(model, inputs, onnx_path, opset_version=17):
             input_names=["speakers", "tokens", "tones"],
             output_names=["output"],
             dynamic_axes={
-                "tokens": {0: "batch_size", 1: "sequence_length"},
-                "tones": {0: "batch_size", 1: "sequence_length"},
+                "tokens": {1: "sequence_length"},
+                "tones": {1: "sequence_length"},
             },
             verbose=False,
             training=torch.onnx.TrainingMode.EVAL,
@@ -110,7 +110,7 @@ def main():
     )
 
     # Export to ONNX
-    inputs = prepare_inputs()
+    inputs = prepare_inputs(max(ipa_to_token.values()) + 1)
     export_name = f"{os.path.splitext(args.tts_model)[0]}_{args.vocoder}.onnx"
     export_to_onnx(model, inputs, export_name)
 

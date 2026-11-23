@@ -311,10 +311,11 @@ def plot_mel_spectrogram(
         pitch = pitch.numpy().squeeze()
     if not isinstance(dur, np.ndarray):
         dur = dur.numpy().squeeze()
+    dur = np.rint(dur).clip(min=0)
 
     # Calculate the time axis
     num_frames = mel_spectrogram.shape[0]
-    time_axis = np.arange(num_frames) * vocoder.hop_size / vocoder.sampling_rate
+    time_axis = (np.arange(num_frames) + 0.5) * vocoder.hop_size / vocoder.sampling_rate
 
     # Create a figure with two subplots
     fig, axs = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
@@ -339,7 +340,7 @@ def plot_mel_spectrogram(
     # Plot the pitch values
     axs[1].plot(time_axis, pitch, marker="o", label="Pitch")
     axs[1].set_xlabel("Time")
-    axs[1].set_ylabel("Pitch")
+    axs[1].set_ylabel("Pitch (normalized)")
     axs[1].set_title("Pitch and Phoneme Segments")
 
     # Highlight the segments and add phoneme labels
@@ -396,7 +397,7 @@ def write_mono_wav(filename, sample_rate, samples):
         raise ValueError("sample_rate must be a positive integer")
 
     # Normalize and convert samples to 16-bit integers
-    samples_int16 = np.int16(samples * 32767)
+    samples_int16 = np.int16(np.clip(samples, -1, 1) * 32767)
 
     # Write to WAV file
     with wave.open(filename, "wb") as wav_file:
@@ -497,7 +498,7 @@ def main():
         default=218,
         help=(
             "Speaker ID to use for synthesis. An integer between 0 and 218, each representing a unique speaker.\n"
-            "Default is 0. Use --list-speakers to see available options."
+            "Default is 218. Use --list-speakers to see available options."
         ),
     )
 
