@@ -30,7 +30,7 @@ def load_model(model_path, vocoder_name):
         else:
             from fastspeech2 import Model
 
-        state_dict = torch.load(model_path, map_location="cpu")
+        state_dict = torch.load(model_path, map_location="cpu", weights_only=False)
         model = (
             Model(
                 num_phones=state_dict["num_phones"],
@@ -45,11 +45,7 @@ def load_model(model_path, vocoder_name):
         model.load_state_dict(state_dict["state_dict"], strict=True)
 
         vocoder = torch.hub.load(
-            "lars76/bigvgan-mirror",
-            vocoder_name,
-            trust_repo=True,
-            pretrained=True,
-            verbose=False,
+            "lars76/minimal-vocoders", "vocoder", name=vocoder_name, trust_repo=True
         )
 
         return (

@@ -31,7 +31,7 @@ If you have suggestions to further enhance speech quality, please contribute by 
 
 - MOS is calculated using UTMOS (higher is better), and CER is calculated using Whisper (lower is better).
 - The "ground truth" refers to the reconstruction of the true mel spectrograms by the vocoder `bigvgan_v2_22khz_80band_fmax8k_256x`.
-- For the prediction of the generated spectrograms, `hifigan_universal_v1` was used. Note that `hifigan_lj_ft_t2_v1`, `hifigan_lj_v1` or `bigvgan_base_22khz_80band` can give better results. See also my other [repository](https://github.com/lars76/bigvgan-mirror/).
+- For the prediction of the generated spectrograms, `hifigan_universal_v1` was used. Note that `hifigan_lj_ft_t2_v1`, `hifigan_lj_v1` or `bigvgan_base_22khz_80band` can give better results. See also my other [repository](https://github.com/lars76/minimal-vocoders/).
 - Approximately 20% of the dataset is used for validation.
 
 ## Audio Samples

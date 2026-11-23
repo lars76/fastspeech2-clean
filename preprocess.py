@@ -14,11 +14,7 @@ OUTPUT_PATH = "processed/"
 
 VOCODER_NAME = "hifigan_universal_v1"
 VOCODER = torch.hub.load(
-    "lars76/bigvgan-mirror",
-    VOCODER_NAME,
-    source="github",
-    trust_repo=True,
-    pretrained=True,
+    "lars76/minimal-vocoders", "vocoder", name=VOCODER_NAME, trust_repo=True
 )
 
 # Pitch

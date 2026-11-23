@@ -359,11 +359,10 @@ def evaluate_cer_mos(model, val_files, use_gt=False):
 
     if use_gt:
         vocoder_predictor = torch.hub.load(
-            "lars76/bigvgan-mirror",
-            "bigvgan_v2_22khz_80band_fmax8k_256x",
-            source="github",
+            "lars76/minimal-vocoders",
+            "vocoder",
+            name="bigvgan_v2_22khz_80band_fmax8k_256x",
             trust_repo=True,
-            pretrained=True,
         ).to(DEVICE)
     else:
         vocoder_predictor = VOCODER.to(DEVICE)
@@ -643,7 +642,7 @@ def main():
     logger.info(f"Best loss: {best_loss}")
     run_time = (time.time() - start_time) / 60
 
-    model.load_state_dict(torch.load("model.pt")["state_dict"])
+    model.load_state_dict(torch.load("model.pt", weights_only=False)["state_dict"])
 
     logger.info("Predicting ground truth mel spectrograms...")
     result_gt = evaluate_cer_mos(model, val_files, use_gt=True)

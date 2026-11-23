@@ -33,7 +33,7 @@ def load_model(
     else:
         raise ValueError(f"The specified model '{model_class}' does not exist.")
 
-    state_dict = torch.load(model_path, map_location=device)
+    state_dict = torch.load(model_path, map_location=device, weights_only=False)
     model = (
         Model(
             num_phones=state_dict["num_phones"],
@@ -66,11 +66,7 @@ def load_vocoder(vocoder_name: str, device: torch.device) -> torch.nn.Module:
         torch.nn.Module: Loaded vocoder model.
     """
     return torch.hub.load(
-        "lars76/bigvgan-mirror",
-        vocoder_name,
-        trust_repo=True,
-        pretrained=True,
-        verbose=False,
+        "lars76/minimal-vocoders", "vocoder", name=vocoder_name, trust_repo=True
     ).to(device)
 
 
